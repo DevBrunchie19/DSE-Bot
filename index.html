@@ -322,45 +322,67 @@
         title: `ErgoBot Self-Check - ${userInfo.name}`,
         author: userInfo.name || "ErgoBot"
       });
-
+      
+const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 20;
+  const maxWidth = pageWidth - margin * 2;
+  let y = 20;
+      
       doc.setFontSize(18);
       doc.setTextColor(185, 30, 113);
-      doc.text("ErgoBot Self-Check Summary", 20, 20);
+      doc.text("ErgoBot Self-Check Summary", margin, y);
+  y += 10;
 
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
-      doc.text(`Name: ${userInfo.name}`, 20, 35);
-      doc.text(`Base: ${userInfo.base}`, 20, 42);
-      doc.text(`Job title: ${userInfo.job}`, 20, 49);
-      doc.text(`Desk: ${userInfo.desk}`, 20, 56);
-      doc.line(20, 60, 190, 60);
+     doc.text(`Name: ${userInfo.name}`, margin, (y += 7));
+  doc.text(`Base: ${userInfo.base}`, margin, (y += 7));
+  doc.text(`Job title: ${userInfo.job}`, margin, (y += 7));
+  doc.text(`Desk: ${userInfo.desk}`, margin, (y += 7));
 
-      let y = 70;
-      userAnswers.forEach((entry, i) => {
-        doc.setFontSize(13);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`${i + 1}. ${entry.question}`, 20, y);
-        y += 8;
-        doc.setTextColor(185, 30, 113);
-        doc.text(`Answer: ${entry.answer}`, 25, y);
-        y += 8;
-        if (entry.tip) {
-          doc.setFontSize(11);
-          doc.setTextColor(105, 105, 105);
-          doc.text(`Tip: ${entry.tip}`, 30, y);
-          y += 10;
-        }
-        if (entry.issue) {
-          doc.setFontSize(11);
-          doc.setTextColor(0, 0, 0);
-          doc.text(`User comment: ${entry.issue}`, 30, y);
-          y += 10;
-        }
-        if (y > 270) {
-          doc.addPage();
-          y = 20;
-        }
-      });
+  doc.line(margin, (y += 5), pageWidth - margin, y);
+  y += 10;
+
+      // Loop through answers
+  userAnswers.forEach((entry, i) => {
+    // Question
+    doc.setFontSize(13);
+    doc.setTextColor(0, 0, 0);
+    const questionLines = doc.splitTextToSize(`${i + 1}. ${entry.question}`, maxWidth);
+    doc.text(questionLines, margin, y);
+    y += questionLines.length * 6 + 4;
+
+    // Answer
+    doc.setFontSize(12);
+    doc.setTextColor(185, 30, 113);
+    const answerLines = doc.splitTextToSize(`Answer: ${entry.answer}`, maxWidth);
+    doc.text(answerLines, margin + 5, y);
+    y += answerLines.length * 6 + 4;
+
+    // Tip
+    if (entry.tip) {
+      doc.setFontSize(11);
+      doc.setTextColor(105, 105, 105);
+      const tipLines = doc.splitTextToSize(`Tip: ${entry.tip}`, maxWidth);
+      doc.text(tipLines, margin + 10, y);
+      y += tipLines.length * 6 + 4;
+    }
+
+    // Issue/comment
+    if (entry.issue) {
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+      const issueLines = doc.splitTextToSize(`User comment: ${entry.issue}`, maxWidth);
+      doc.text(issueLines, margin + 10, y);
+      y += issueLines.length * 6 + 6;
+    }
+
+    // Page break check
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
+    }
+  });
 
        const pageCount = doc.internal.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
