@@ -150,7 +150,7 @@ function startAssessment() {
     desk: document.getElementById('Desk number (if appropriate)').value
   };
 
-  if (!userInfo.name || !userInfo.department || !userInfo.date) {
+  if (!userInfo.name || !userInfo.base || !userInfo.job) {
     alert("Please fill in all fields before starting.");
     return;
   }
