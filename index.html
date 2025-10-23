@@ -84,6 +84,8 @@
     const messages = document.getElementById('messages');
     const controls = document.getElementById('controls');
      const welcomeMessage = document.getElementById('welcome');
+     document.getElementById('chatbox').style.display = 'none';
+
 
 // ✏️✏️ This is where to add questions answers and images ✏️✏️ 
     const questions = [
@@ -117,6 +119,7 @@
       "You're doing well, keep going!",
       "I am in awe!"
     ];
+    
 
     let currentQuestion = 0;
     let userAnswers = [];
