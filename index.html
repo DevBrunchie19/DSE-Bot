@@ -145,8 +145,8 @@
       messages.appendChild(typing);
       messages.scrollTop = messages.scrollHeight;
 
-      // Delay is based on message length (min 600ms, max 3000ms)
-      const delay = Math.min(3000, Math.max(600, text.length * speed));
+      // Delay is based on message length (min 400ms, max 3000ms)
+      const delay = Math.min(3000, Math.max(400, text.length * speed));
 
       return new Promise(resolve => {
         setTimeout(() => {
