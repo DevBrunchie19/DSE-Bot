@@ -137,14 +137,18 @@
     let userAnswers = [];
     let userInfo = {};
 
-    // Typing effect helper
-    function showTyping(delay = 800) {
+    // 💬 Dynamic typing delay function
+    async function showTyping(text = "", speed = 40) {
+      const typing = document.createElement('div');
+      typing.className = 'message bot typing';
+      typing.innerText = "ErgoBot is typing...";
+      messages.appendChild(typing);
+      messages.scrollTop = messages.scrollHeight;
+
+      // Delay is based on message length (min 800ms, max 3000ms)
+      const delay = Math.min(3000, Math.max(800, text.length * speed));
+
       return new Promise(resolve => {
-        const typing = document.createElement('div');
-        typing.className = 'message bot typing';
-        typing.innerText = "ErgoBot is typing...";
-        messages.appendChild(typing);
-        messages.scrollTop = messages.scrollHeight;
         setTimeout(() => {
           typing.remove();
           resolve();
