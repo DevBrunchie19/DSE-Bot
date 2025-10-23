@@ -251,13 +251,13 @@
       if (helped) {
         await showTyping();
         appendMessage("Great! Glad that helped.", 'bot');
-        userAnswers.push({ question: q.text, answer: "No (but fixed)", tip: q.tip, image: q.image, issue: null });
+        userAnswers.push({ question: q.text, answer: "No (but resolved)", tip: q.tip, image: q.image, issue: null });
         controls.innerHTML = `<button onclick="nextQuestion()">Next Question</button>`;
       } else {
         await showTyping();
-        appendMessage("Please describe the issue so we can follow up later:", 'bot');
+        appendMessage("Please describe the issue so we can follow up:", 'bot');
         const textarea = document.createElement('textarea');
-        textarea.placeholder = "Type your issue here...";
+        textarea.placeholder = "Type here...";
         textarea.rows = 3;
         controls.appendChild(textarea);
 
@@ -271,7 +271,7 @@
           }
           appendMessage(issueText, 'user');
           await showTyping();
-          appendMessage("Thanks for sharing — this will be included in your report.", 'bot');
+          appendMessage("Thanks for sharing, your description will be included in your report.", 'bot');
           userAnswers.push({
             question: q.text,
             answer: "No (unresolved)",
