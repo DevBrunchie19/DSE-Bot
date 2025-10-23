@@ -102,6 +102,23 @@
     const welcomeMessage = document.getElementById('welcome');
     document.getElementById('chatbox').style.display = 'none';
 
+function formatHTMLtoText(html) {
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = html;
+
+  // Convert <li> to bullet points
+  const listItems = tempDiv.querySelectorAll("li");
+  listItems.forEach(li => {
+    li.textContent = `• ${li.textContent}`;
+  });
+
+  // Replace <br> with newlines
+  tempDiv.innerHTML = tempDiv.innerHTML.replace(/<br\s*\/?>/gi, '\n');
+
+  // Remove all other tags
+  return tempDiv.textContent || tempDiv.innerText || "";
+}
+    
     const questions = [
       {
         text: "<b>Can you find a comfortable keying position? (As seen in image below)</b>. You should sit upright and have room to rest your palms or wrists on the desk to provide support.",
@@ -347,7 +364,8 @@ const pageWidth = doc.internal.pageSize.getWidth();
     // Question
     doc.setFontSize(13);
     doc.setTextColor(0, 0, 0);
-    const questionLines = doc.splitTextToSize(`${i + 1}. ${entry.question}`, maxWidth);
+const cleanQuestion = formatHTMLtoText(entry.question);
+const questionLines = doc.splitTextToSize(`${i + 1}. ${cleanQuestion}`, maxWidth);
     doc.text(questionLines, margin, y);
     y += questionLines.length * 6 + 4;
 
