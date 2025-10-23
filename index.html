@@ -224,8 +224,24 @@ function startAssessment() {
      async function downloadPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
+       // --- Adds user info at the top of the PDF ---
+doc.setFontSize(18);
+doc.setTextColor(185, 30, 113);
+doc.setFont("arial", "bold");
+doc.text("ErgoBot Self-Check Summary", 20, 20);
 
- let y = 15;
+doc.setFontSize(12);
+doc.setTextColor(0, 0, 0);
+doc.setFont("arial", "normal");
+doc.text(`Name: ${userInfo.name}`, 20, 35);
+doc.text(`Base: ${userInfo.base}`, 20, 42);
+doc.text(`Job title: ${userInfo.job}`, 20, 49);
+doc.text(`Desk: ${userInfo.desk}`, 20, 56);
+
+let y = 70; // move below user info before adding questions
+
+
+// let y = 15;
   doc.setFontSize(18);
   doc.setTextColor(185, 30, 113);  // DLT Pink
 doc.setFont("arial", "bold");
