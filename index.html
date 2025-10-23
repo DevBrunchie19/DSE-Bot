@@ -104,7 +104,7 @@
 
     const questions = [
       {
-        text: "Can you find a comfortable keying position? (As seen in image 1). You should sit upright and have room to rest your palms or wrists on the desk to provide support.",
+        text: "<b>Can you find a comfortable keying position? (As seen in image below)</b>. You should sit upright and have room to rest your palms or wrists on the desk to provide support.",
         tip: "Try pushing the display screen further back to create more room for the keyboard, hands and wrists. Users of thick, raised keyboards may need a wrist rest. Or Move the keyboard to allow adequate support for palm of hand on desk or space for wrist support.",
      image: "Elbow ergo.png"
       },
@@ -159,7 +159,7 @@
     function appendMessage(text, sender, image = null) {
       const msg = document.createElement('div');
       msg.className = 'message ' + sender;
-      msg.innerText = text;
+      msg.innerHTML = text;
       messages.appendChild(msg);
 
       if (image) {
