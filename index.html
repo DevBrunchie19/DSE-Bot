@@ -233,7 +233,7 @@
         controls.innerHTML = `<button onclick="nextQuestion()">Next Question</button>`;
       } else {
         await showTyping();
-        appendMessage(q.tip, 'bot', q.image);
+        appendMessage(q.tip, 'bot');
         await showTyping();
         appendMessage("Did this tip help solve the issue?", 'bot');
         controls.innerHTML = `
