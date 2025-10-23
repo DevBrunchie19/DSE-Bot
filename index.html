@@ -140,6 +140,28 @@
 
       messages.scrollTop = messages.scrollHeight;
     }
+let userInfo = {};
+
+function startAssessment() {
+  userInfo = {
+    name: document.getElementById('Name').value.trim(),
+    base: document.getElementById('Base/site').value.trim(),
+    job: document.getElementById('Job title').value.trim(),
+    desk: document.getElementById('Desk number (if appropriate)').value.trim(),
+  };
+
+  if (!userInfo.name || !userInfo.department || !userInfo.date) {
+    alert("Please fill in all fields before starting.");
+    return;
+  }
+
+  // Hide the form and show the chatbox
+  document.getElementById('userInfoForm').style.display = 'none';
+  document.getElementById('chatbox').style.display = 'block';
+
+  // Start the first question
+  showQuestion();
+}
 
    function showQuestion() {
       messages.innerHTML = '';
