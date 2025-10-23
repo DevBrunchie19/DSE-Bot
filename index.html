@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ErgoBot - Ergonomics Self-Check</title>
   <style>
-     body {
+    body {
       font-family: Arial, sans-serif;
       background-color: #f8f9fa;
       padding: 10px;
@@ -19,11 +19,10 @@
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-.welcome {
+    .welcome {
       background-color: #b91e71;
       color: #ffff;
       text-align: left;
-      
     }
     .message {
       margin: 10px 0;
@@ -61,33 +60,41 @@
       border-radius: 8px;
       margin-top: 5px;
     }
+    input {
+      width: 98%;
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      transition: border-color 0.2s;
+    }
   </style>
 </head>
 <body>
+  <!-- 👇 User Info Form -->
   <div id="userInfoForm" style="max-width:600px;margin:auto;background:white;padding:15px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.1);margin-bottom:20px;">
-  <h3 style="color:#b91e71;">Before we begin</h3>
-  <p>Please fill out your details:</p>
-  <input id="Name" placeholder="Your name" style="width:98%;padding:8px;margin:5px 0;border-radius:5px;border:1px solid #ccc;">
-  <input id="Base/site" placeholder="Base/site" style="width:98%;padding:8px;margin:5px 0;border-radius:5px;border:1px solid #ccc;">
-  <input id="Job title" placeholder="Job title" style="width:98%;padding:8px;margin:5px 0;border-radius:5px;border:1px solid #ccc;">
-  <input id="Desk number (if appropriate)" placeholder="Desk number (if applicable)" style="width:98%;padding:8px;margin:5px 0;border-radius:5px;border:1px solid #ccc;">
-  <button onclick="startAssessment()" style="background-color:#b91e71;color:white;padding:8px 15px;border:none;border-radius:5px;cursor:pointer;margin-top:10px;">Start Self-Check</button>
-</div>
- <div id="chatbox">
+    <h3 style="color:#b91e71;">Before we begin</h3>
+    <p>Please fill out your details:</p>
+    <input id="Name" placeholder="Your name">
+    <input id="Base/site" placeholder="Base/site">
+    <input id="Job title" placeholder="Job title">
+    <input id="Desk number (if appropriate)" placeholder="Desk number (if applicable)">
+    <button onclick="startAssessment()" style="background-color:#b91e71;color:white;padding:8px 15px;border:none;border-radius:5px;cursor:pointer;margin-top:10px;">Start Self-Check</button>
+  </div>
+
+  <!-- 👇 Chatbox -->
+  <div id="chatbox">
     <div class="message welcome" id="welcome">Hi! I'm <strong>ErgoBot</strong>. Let's go through a quick office ergonomics self-check.</div>
     <div id="messages"></div>
     <div id="controls" class="buttons"></div>
   </div>
 
-
-   <script>
+  <script>
     const messages = document.getElementById('messages');
     const controls = document.getElementById('controls');
-     const welcomeMessage = document.getElementById('welcome');
-     document.getElementById('chatbox').style.display = 'none';
+    const welcomeMessage = document.getElementById('welcome');
+    document.getElementById('chatbox').style.display = 'none';
 
-
-// ✏️✏️ This is where to add questions answers and images ✏️✏️ 
     const questions = [
       {
         text: "Are your eyes level with the top of your monitor?",
@@ -111,7 +118,6 @@
       }
     ];
 
-// ✏️✏️ Add or edit positive feedback options here ✏️✏️ 
     const positiveFeedback = [
       "Great job!",
       "Nice work keeping things ergonomic!",
@@ -119,11 +125,44 @@
       "You're doing well, keep going!",
       "I am in awe!"
     ];
-    
 
     let currentQuestion = 0;
     let userAnswers = [];
-   
+    let userInfo = {};
+
+    // ✅ VALIDATED startAssessment function
+    function startAssessment() {
+      const nameField = document.getElementById('Name');
+      const baseField = document.getElementById('Base/site');
+      const jobField = document.getElementById('Job title');
+      const deskField = document.getElementById('Desk number (if appropriate)');
+
+      userInfo = {
+        name: nameField.value.trim(),
+        base: baseField.value.trim(),
+        job: jobField.value.trim(),
+        desk: deskField.value.trim()
+      };
+
+      // Reset borders
+      [nameField, baseField, jobField, deskField].forEach(f => f.style.borderColor = '#ccc');
+
+      let missing = [];
+      if (!userInfo.name) missing.push(nameField);
+      if (!userInfo.base) missing.push(baseField);
+      if (!userInfo.job) missing.push(jobField);
+
+      if (missing.length > 0) {
+        missing.forEach(f => f.style.borderColor = 'red');
+        alert("⚠️ Please fill in all required fields before starting your self-check.");
+        return;
+      }
+
+      document.getElementById('userInfoForm').style.display = 'none';
+      document.getElementById('chatbox').style.display = 'block';
+      showQuestion();
+    }
+
     function appendMessage(text, sender, image = null) {
       const msg = document.createElement('div');
       msg.className = 'message ' + sender;
@@ -140,35 +179,13 @@
 
       messages.scrollTop = messages.scrollHeight;
     }
-let userInfo = {};
 
-function startAssessment() {
-  userInfo = {
-    name: document.getElementById('Name').value.trim(),
-    base: document.getElementById('Base/site').value.trim(),
-    job: document.getElementById('Job title').value.trim(),
-    desk: document.getElementById('Desk number (if appropriate)').value
-  };
-
-  if (!userInfo.name || !userInfo.base || !userInfo.job) {
-    alert("Please fill in all fields before starting.");
-    return;
-  }
-
-  // Hide the form and show the chatbox
-  document.getElementById('userInfoForm').style.display = 'none';
-  document.getElementById('chatbox').style.display = 'block';
-
-  // Start the first question
-  showQuestion();
-}
-
-   function showQuestion() {
+    function showQuestion() {
       messages.innerHTML = '';
       if (currentQuestion < questions.length) {
         controls.innerHTML = '';
         const q = questions[currentQuestion];
-        appendMessage(q.text, 'bot');
+        appendMessage(q.text, 'bot', q.image);
         controls.innerHTML = `
           <button onclick="handleAnswer(true)">Yes</button>
           <button onclick="handleAnswer(false)">No</button>
@@ -177,7 +194,6 @@ function startAssessment() {
         showSummary();
       }
     }
-
 
     function handleAnswer(isYes) {
       const q = questions[currentQuestion];
@@ -197,7 +213,8 @@ function startAssessment() {
       currentQuestion++;
       showQuestion();
     }
-  function showSummary() {
+
+    function showSummary() {
       messages.innerHTML = '';
       welcomeMessage.innerHTML = "Well done on completing the self-check!";
       appendMessage("Here's a summary of your responses:", 'bot');
@@ -209,9 +226,9 @@ function startAssessment() {
         }
       });
       controls.innerHTML = `
-  <button onclick="restartBot()">Restart</button>
-  <button onclick="downloadPDF()">Download Summary</button>
-`;
+        <button onclick="restartBot()">Restart</button>
+        <button onclick="downloadPDF()">Download Summary</button>
+      `;
     }
 
     function restartBot() {
@@ -221,65 +238,82 @@ function startAssessment() {
       currentQuestion = 0;
       showQuestion();
     }
-     async function downloadPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-       // --- Adds user info at the top of the PDF ---
-doc.setFontSize(18);
-doc.setTextColor(185, 30, 113);
-doc.setFont("arial", "bold");
-doc.text("ErgoBot Self-Check Summary", 20, 20);
 
-doc.setFontSize(12);
-doc.setTextColor(0, 0, 0);
-doc.setFont("arial", "normal");
-doc.text(`Name: ${userInfo.name}`, 20, 35);
-doc.text(`Base: ${userInfo.base}`, 20, 42);
-doc.text(`Job title: ${userInfo.job}`, 20, 49);
-doc.text(`Desk: ${userInfo.desk}`, 20, 56);
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
 
-let y = 70; // move below user info before adding questions
+      // --- Set PDF Metadata ---
+      doc.setProperties({
+        title: `ErgoBot Self-Check - ${userInfo.name}`,
+        subject: "Workstation Ergonomics Self-Assessment",
+        author: userInfo.name || "ErgoBot",
+        keywords: "Ergonomics, Self Check, Workplace, Safety",
+        creator: "ErgoBot Web App"
+      });
 
+      // --- Add Header ---
+      doc.setFontSize(18);
+      doc.setTextColor(185, 30, 113);
+      doc.setFont("arial", "bold");
+      doc.text("ErgoBot Self-Check Summary", 20, 20);
 
-// let y = 15;
-  doc.setFontSize(18);
-  doc.setTextColor(185, 30, 113);  // DLT Pink
-doc.setFont("arial", "bold");
-  doc.text("ErgoBot Self-Check Summary", 20, y);
-doc.setFont("arial", "normal"); // Reset to normal
-  y += 15;
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont("arial", "normal");
+      doc.text(`Name: ${userInfo.name}`, 20, 35);
+      doc.text(`Base: ${userInfo.base}`, 20, 42);
+      doc.text(`Job title: ${userInfo.job}`, 20, 49);
+      doc.text(`Desk: ${userInfo.desk}`, 20, 56);
 
-  userAnswers.forEach((entry, i) => {
-  doc.setFontSize(14);
-  doc.setTextColor(0, 0, 0);  // black
-  doc.setFont("arial", "normal");
-  doc.text(`${i + 1}. ${entry.question}`, 20, y);
-  y += 9;
+      // Divider line
+      doc.setDrawColor(185, 30, 113);
+      doc.line(20, 60, 190, 60);
 
-  doc.setFontSize(14);
-  doc.setTextColor(185, 30, 113);  // DLT Pink
-  doc.setFont("arial", "bold");  // Bold for answers
-  doc.text(entry.answer, 25, y);
-  doc.setFont("arial", "normal"); // Reset to normal
-  y += 9;
+      let y = 70;
 
-  if (entry.tip) {
-    doc.setFontSize(11);
-    doc.setTextColor(105, 105, 105);  // Dim Gray
-    doc.text(`Tip: ${entry.tip}`, 30, y);
-    y += 12;
-  }
-    if (y > 270) {
-      doc.addPage();
-      y = 10;
+      // --- Add Question Responses ---
+      userAnswers.forEach((entry, i) => {
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.setFont("arial", "normal");
+        doc.text(`${i + 1}. ${entry.question}`, 20, y);
+        y += 9;
+
+        doc.setFontSize(14);
+        doc.setTextColor(185, 30, 113);
+        doc.setFont("arial", "bold");
+        doc.text(entry.answer, 25, y);
+        doc.setFont("arial", "normal");
+        y += 9;
+
+        if (entry.tip) {
+          doc.setFontSize(11);
+          doc.setTextColor(105, 105, 105);
+          doc.text(`Tip: ${entry.tip}`, 30, y);
+          y += 12;
+        }
+
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+      });
+
+      // --- Optional Footer ---
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.setTextColor(120, 120, 120);
+        doc.text("Generated by ErgoBot", 20, 285);
+        doc.text(`Page ${i} of ${pageCount}`, 190, 285, { align: "right" });
+      }
+
+      doc.save(`ErgoBot_SelfCheck_${userInfo.name}.pdf`);
     }
-  });
 
-  doc.save("ErgoBot_SelfCheck_Summary.pdf");
-}
     showQuestion();
   </script>
 </body>
 </html>
-
-
