@@ -299,7 +299,7 @@
         appendMessage(entry.question, 'bot');
         appendMessage(entry.answer, 'user');
         if (entry.tip) appendMessage(entry.tip, 'bot', entry.image);
-        if (entry.issue) appendMessage("User note: " + entry.issue, 'bot');
+        if (entry.issue) appendMessage("User note: " + entry.issue, 'user');
       });
       controls.innerHTML = `
         <button onclick="restartBot()">Restart</button>
