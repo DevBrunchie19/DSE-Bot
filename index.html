@@ -97,9 +97,12 @@
 
     const questions = [
       {
-        text: "<strong>Can you find a comfortable keying position? (As seen in image 1).</strong> You should sit upright and have room to rest your palms or wrists on the desk to provide support. ",
+        text: "Can you find a comfortable keying position? (As seen in image 1). You should sit upright and have room to rest your palms or wrists on the desk to provide support. ",
         tip: "Adjust your monitor so the top is at or just below eye level. Use a monitor riser or books if needed.",
-        image: "1Eye-level.png"
+        image: "1Eye-level.png",
+         followUp: {
+      text: "Would you like some tips on adjusting your monitor height?"
+    }
       },
       {
         text: "Are your feet flat on the floor when seated?",
@@ -195,19 +198,43 @@
       }
     }
 
-    function handleAnswer(isYes) {
-      const q = questions[currentQuestion];
-      userAnswers.push({ question: q.text, answer: isYes ? "Yes" : "No", tip: isYes ? null : q.tip, image: isYes ? null : q.image });
-      controls.innerHTML = '';
-      appendMessage(isYes ? "Yes" : "No", 'user');
-      if (!isYes) {
-        appendMessage(q.tip, 'bot', q.image);
-      } else {
-        const feedback = positiveFeedback[Math.floor(Math.random() * positiveFeedback.length)];
-        appendMessage(feedback, 'bot');
-      }
-      controls.innerHTML = `<button onclick="nextQuestion()">Next Question</button>`;
+  function handleAnswer(isYes) {
+  const q = questions[currentQuestion];
+  appendMessage(isYes ? "Yes" : "No", 'user');
+  controls.innerHTML = '';
+
+  if (!isYes) {
+    appendMessage(q.tip, 'bot', q.image);
+    // 👇 Check if a follow-up question exists
+    if (q.followUp && !q._followedUp) {
+      q._followedUp = true; // prevent loops
+      appendMessage(q.followUp.text, 'bot');
+      controls.innerHTML = `
+        <button onclick="handleFollowUp(true)">Yes</button>
+        <button onclick="handleFollowUp(false)">No</button>
+      `;
+      return;
     }
+  } else {
+    const feedback = positiveFeedback[Math.floor(Math.random() * positiveFeedback.length)];
+    appendMessage(feedback, 'bot');
+  }
+
+  controls.innerHTML = `<button onclick="nextQuestion()">Next Question</button>`;
+}
+function handleFollowUp(isYes) {
+  const q = questions[currentQuestion];
+  appendMessage(isYes ? "Yes" : "No", 'user');
+  controls.innerHTML = '';
+
+  if (!isYes) {
+    appendMessage(q.followUp.tip, 'bot', q.followUp.image);
+  } else {
+    appendMessage("Great! Glad that’s sorted.", 'bot');
+  }
+
+  controls.innerHTML = `<button onclick="nextQuestion()">Next Question</button>`;
+}
 
     function nextQuestion() {
       currentQuestion++;
