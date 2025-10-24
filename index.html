@@ -360,7 +360,7 @@ function formatHTMLtoText(html) {
       userAnswers.forEach(entry => {
         appendMessage(entry.question, 'bot');
         appendMessage(entry.answer, 'user');
-        if (entry.tip) appendMessage(entry.tip, 'bot', entry.image);
+        if (entry.tip) appendMessage(entry.tip, 'bot');
         if (entry.issue) appendMessage("User note: " + entry.issue, 'user');
       });
       controls.innerHTML = `
