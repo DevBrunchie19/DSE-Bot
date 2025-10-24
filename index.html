@@ -259,7 +259,7 @@ function formatHTMLtoText(html) {
         await showTyping();
         appendMessage(q.tip, 'bot');
         await showTyping();
-        appendMessage("Did this tip help solve the issue?", 'bot');
+        appendMessage("Did this help solve the issue?", 'bot');
         controls.innerHTML = `
           <button onclick="handleTipHelp(true)">Yes</button>
           <button onclick="handleTipHelp(false)">No</button>
@@ -284,7 +284,7 @@ function formatHTMLtoText(html) {
           await showTyping();
           appendMessage(q.extraTip, 'bot');
           await showTyping();
-          appendMessage("Did this additional tip help?", 'bot');
+          appendMessage("Did this help?", 'bot');
           controls.innerHTML = `
             <button onclick="handleExtraTipHelp(true)">Yes</button>
             <button onclick="handleExtraTipHelp(false)">No</button>
@@ -302,10 +302,10 @@ function formatHTMLtoText(html) {
 
       if (helped) {
         await showTyping();
-        appendMessage("Fantastic! Glad the second tip worked.", 'bot');
+        appendMessage("Fantastic! Glad that worked.", 'bot');
         userAnswers.push({
           question: q.text,
-          answer: "No (resolved after extra tip)",
+          answer: "No (resolved after extra step)",
           tip: q.extraTip,
           image: q.image,
           issue: null
