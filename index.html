@@ -318,12 +318,11 @@ function formatHTMLtoText(html) {
         if (entry.issue) appendMessage("User note: " + entry.issue, 'user');
       });
       controls.innerHTML = `
-       /*<button onclick="restartBot()">Restart</button> */
         <button onclick="downloadPDF()">Download Summary</button>
       `;
     }
-
-   /* function restartBot() {
+/*<button onclick="restartBot()">Restart</button>
+   function restartBot() {
       messages.innerHTML = '';
       welcomeMessage.innerHTML = "Hi! I'm <strong>ErgoBot</strong>. Let's go through a quick office ergonomics self-check.";
       userAnswers = [];
