@@ -318,7 +318,7 @@ function formatHTMLtoText(html) {
         if (entry.issue) appendMessage("User note: " + entry.issue, 'user');
       });
       controls.innerHTML = `
-        //<button onclick="restartBot()">Restart</button>
+       /*<button onclick="restartBot()">Restart</button> */
         <button onclick="downloadPDF()">Download Summary</button>
       `;
     }
