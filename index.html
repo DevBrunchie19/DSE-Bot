@@ -380,6 +380,7 @@ const questionLines = doc.splitTextToSize(`${i + 1}. ${cleanQuestion}`, maxWidth
     if (entry.tip) {
       doc.setFontSize(11);
       doc.setTextColor(105, 105, 105);
+      const cleanTip = formatHTMLtoText(entry.tip);
       const tipLines = doc.splitTextToSize(`Tip: ${entry.tip}`, maxWidth);
       doc.text(tipLines, margin + 10, y);
       y += tipLines.length * 6 + 4;
