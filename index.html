@@ -65,7 +65,6 @@
       border-radius: 5px;
       border: 1px solid #ccc;
     }
-    /* Typing indicator */
     .typing {
       font-style: italic;
       color: gray;
@@ -78,7 +77,6 @@
   </style>
 </head>
 <body>
-  <!-- User Info Form -->
   <div id="userInfoForm" style="max-width:600px;margin:auto;background:white;padding:15px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.1);margin-bottom:20px;">
     <h3 style="color:#b91e71;">Before we begin</h3>
     <p>Please fill out your details:</p>
@@ -89,7 +87,6 @@
     <button onclick="startAssessment()">Start Self-Check</button>
   </div>
 
-  <!-- Chatbox -->
   <div id="chatbox">
     <div class="message welcome" id="welcome">Hi! I'm <strong>ErgoBot</strong>. Let's go through a quick office ergonomics self-check.</div>
     <div id="messages"></div>
@@ -106,25 +103,22 @@ function formatHTMLtoText(html) {
   const tempDiv = document.createElement("div");
   tempDiv.innerHTML = html;
 
-  // Convert <li> to bullet points in PDF
   const listItems = tempDiv.querySelectorAll("li");
   listItems.forEach(li => {
     li.textContent = `• ${li.textContent}`;
   });
 
-  // Replace <br> with newlines in PDF
   tempDiv.innerHTML = tempDiv.innerHTML.replace(/<br\s*\/?>/gi, '\n');
 
-  // Remove all other tags in PDF
   return tempDiv.textContent || tempDiv.innerText || "";
 }
     
-    //Add and edit questions below
     const questions = [
       {
         text: "<b>Can you find a comfortable keying position? (As seen in image below)</b>. You should sit upright and have room to rest your palms or wrists on the desk to provide support.",
         tip: "Try pushing the display screen further back to create more room for the keyboard, hands and wrists. Users of thick, raised keyboards may need a wrist rest. Or Move the keyboard to allow adequate support for palm of hand on desk or space for wrist support.",
-     image: "Elbow ergo.png"
+        extraTip: "If that still doesn’t help, try adjusting your chair height so your elbows are level with the desk surface.",
+        image: "Elbow ergo.png"
       },
       {
         text: "Do you have good keyboard technique? <br> You should avoid<ul><li>Having hands bent up at the wrist</li><li>Hitting the keys too hard</li><li>Overstretching the fingers</li></ul>",
@@ -141,17 +135,18 @@ function formatHTMLtoText(html) {
       {
         text: "Do you hold the mouse close to the keyboard as shown in the first picture? <br> Check you meet this guidance:<ul><li>Most devices are best placed as close as possible to the keyboard</li><li>Arm should not overreach</li><li>Users should not leave their hand on the device when not in use (hovering)</li><li>User should have a relaxed arm and straight wrist</li></ul>",
         tip: "Adjust the way that you hold the mouse:<ul><li>Most devices are best placed as close as possible to the keyboard</li><li>Arm should not overreach</li><li>Users should not leave their hand on the device when not in use (hovering)</li><li>User should have a relaxed arm and straight wrist</li></ul>",
-      image: "Elbow ergo.png"
+        image: "Elbow ergo.png"
       },
-       {
+      {
         text: "Can you find a comfortable working position while using the mouse? You should be able to support your arm and wrist using the desk surface or arm of chair?",
         tip: "Mouse mats with built in wrist supports are available to you should you require one.",
-      image: "Elbow ergo.png"
+        extraTip: "If that still doesn’t help, ensure your mouse is at the same height as your keyboard and within easy reach.",
+        image: "Elbow ergo.png"
       },
       {
         text: "Does the mouse work smoothly at a speed that suits you?",
         tip: "Clean the mouse. <br> <ul><li>A roller ball mouse collects desk debris and needs regular cleaning</li><li>A light operated mouse collects dust on the feet and in the light recess; they may also react differently on polished /matt surfaces</li></ul>",
-      image: "Elbow ergo.png"
+        image: "Elbow ergo.png"
       }
     ];
 
@@ -167,7 +162,6 @@ function formatHTMLtoText(html) {
     let userAnswers = [];
     let userInfo = {};
 
-    // 💬 Dynamic typing delay function
     async function showTyping(text = "", speed = 40) {
       const typing = document.createElement('div');
       typing.className = 'message bot typing';
@@ -175,7 +169,6 @@ function formatHTMLtoText(html) {
       messages.appendChild(typing);
       messages.scrollTop = messages.scrollHeight;
 
-      // Delay is based on message length (min 400ms, max 3000ms)
       const delay = Math.min(3000, Math.max(400, text.length * speed));
 
       return new Promise(resolve => {
@@ -202,7 +195,6 @@ function formatHTMLtoText(html) {
       messages.scrollTop = messages.scrollHeight;
     }
 
-    // Start assessment
     function startAssessment() {
       const nameField = document.getElementById('Name');
       const baseField = document.getElementById('Base/site');
@@ -284,35 +276,73 @@ function formatHTMLtoText(html) {
         userAnswers.push({ question: q.text, answer: "No (but resolved)", tip: q.tip, image: q.image, issue: null });
         controls.innerHTML = `<button onclick="nextQuestion()">Next Question</button>`;
       } else {
-        await showTyping();
-        appendMessage("Please describe the issue so we can follow up:", 'bot');
-        const textarea = document.createElement('textarea');
-        textarea.placeholder = "Type here...";
-        textarea.rows = 3;
-        controls.appendChild(textarea);
-
-        const submitBtn = document.createElement('button');
-        submitBtn.textContent = "Submit Issue";
-        submitBtn.onclick = async () => {
-          const issueText = textarea.value.trim();
-          if (!issueText) {
-            alert("Please enter a brief description before continuing.");
-            return;
-          }
-          appendMessage(issueText, 'user');
+        if (q.extraTip) {
           await showTyping();
-          appendMessage("Thanks for sharing, your description will be included in your report.", 'bot');
-          userAnswers.push({
-            question: q.text,
-            answer: "No (unresolved)",
-            tip: q.tip,
-            image: q.image,
-            issue: issueText
-          });
-          controls.innerHTML = `<button onclick="nextQuestion()">Next Question</button>`;
-        };
-        controls.appendChild(submitBtn);
+          appendMessage("Let's try one more thing:", 'bot');
+          await showTyping();
+          appendMessage(q.extraTip, 'bot');
+          await showTyping();
+          appendMessage("Did this additional tip help?", 'bot');
+          controls.innerHTML = `
+            <button onclick="handleExtraTipHelp(true)">Yes</button>
+            <button onclick="handleExtraTipHelp(false)">No</button>
+          `;
+        } else {
+          await askForIssue(q);
+        }
       }
+    }
+
+    async function handleExtraTipHelp(helped) {
+      const q = questions[currentQuestion];
+      controls.innerHTML = '';
+      appendMessage(helped ? "Yes" : "No", 'user');
+
+      if (helped) {
+        await showTyping();
+        appendMessage("Fantastic! Glad the second tip worked.", 'bot');
+        userAnswers.push({
+          question: q.text,
+          answer: "No (resolved after extra tip)",
+          tip: q.extraTip,
+          image: q.image,
+          issue: null
+        });
+        controls.innerHTML = `<button onclick="nextQuestion()">Next Question</button>`;
+      } else {
+        await askForIssue(q);
+      }
+    }
+
+    async function askForIssue(q) {
+      await showTyping();
+      appendMessage("Please describe the issue so we can follow up:", 'bot');
+      const textarea = document.createElement('textarea');
+      textarea.placeholder = "Type here...";
+      textarea.rows = 3;
+      controls.appendChild(textarea);
+
+      const submitBtn = document.createElement('button');
+      submitBtn.textContent = "Submit Issue";
+      submitBtn.onclick = async () => {
+        const issueText = textarea.value.trim();
+        if (!issueText) {
+          alert("Please enter a brief description before continuing.");
+          return;
+        }
+        appendMessage(issueText, 'user');
+        await showTyping();
+        appendMessage("Thanks for sharing, your description will be included in your report.", 'bot');
+        userAnswers.push({
+          question: q.text,
+          answer: "No (unresolved)",
+          tip: q.extraTip || q.tip,
+          image: q.image,
+          issue: issueText
+        });
+        controls.innerHTML = `<button onclick="nextQuestion()">Next Question</button>`;
+      };
+      controls.appendChild(submitBtn);
     }
 
     function nextQuestion() {
@@ -335,14 +365,6 @@ function formatHTMLtoText(html) {
         <button onclick="downloadPDF()">Download Your Summary</button>
       `;
     }
-/*<button onclick="restartBot()">Restart</button>
-   function restartBot() {
-      messages.innerHTML = '';
-      welcomeMessage.innerHTML = "Hi! I'm <strong>ErgoBot</strong>. Let's go through a quick office ergonomics self-check.";
-      userAnswers = [];
-      currentQuestion = 0;
-      showQuestion();
-    } */
 
     async function downloadPDF() {
       const { jsPDF } = window.jspdf;
@@ -352,70 +374,64 @@ function formatHTMLtoText(html) {
         author: userInfo.name || "ErgoBot"
       });
       
-const pageWidth = doc.internal.pageSize.getWidth();
-  const margin = 20;
-  const maxWidth = pageWidth - margin * 2;
-  let y = 20;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 20;
+      const maxWidth = pageWidth - margin * 2;
+      let y = 20;
       
       doc.setFontSize(18);
       doc.setTextColor(185, 30, 113);
       doc.text("ErgoBot Self-Check Summary", margin, y);
-  y += 10;
+      y += 10;
 
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
-     doc.text(`Name: ${userInfo.name}`, margin, (y += 7));
-  doc.text(`Base: ${userInfo.base}`, margin, (y += 7));
-  doc.text(`Job title: ${userInfo.job}`, margin, (y += 7));
-  doc.text(`Desk: ${userInfo.desk}`, margin, (y += 7));
+      doc.text(`Name: ${userInfo.name}`, margin, (y += 7));
+      doc.text(`Base: ${userInfo.base}`, margin, (y += 7));
+      doc.text(`Job title: ${userInfo.job}`, margin, (y += 7));
+      doc.text(`Desk: ${userInfo.desk}`, margin, (y += 7));
 
-  doc.line(margin, (y += 5), pageWidth - margin, y);
-  y += 10;
+      doc.line(margin, (y += 5), pageWidth - margin, y);
+      y += 10;
 
-      // Loop through answers
-  userAnswers.forEach((entry, i) => {
-    // Question
-    doc.setFontSize(13);
-    doc.setTextColor(0, 0, 0);
-const cleanQuestion = formatHTMLtoText(entry.question);
-const questionLines = doc.splitTextToSize(`${i + 1}. ${cleanQuestion}`, maxWidth);
-    doc.text(questionLines, margin, y);
-    y += questionLines.length * 6 + 4;
+      userAnswers.forEach((entry, i) => {
+        doc.setFontSize(13);
+        doc.setTextColor(0, 0, 0);
+        const cleanQuestion = formatHTMLtoText(entry.question);
+        const questionLines = doc.splitTextToSize(`${i + 1}. ${cleanQuestion}`, maxWidth);
+        doc.text(questionLines, margin, y);
+        y += questionLines.length * 6 + 4;
 
-    // Answer
-    doc.setFontSize(12);
-    doc.setTextColor(185, 30, 113);
-    const answerLines = doc.splitTextToSize(`Answer: ${entry.answer}`, maxWidth);
-    doc.text(answerLines, margin + 5, y);
-    y += answerLines.length * 6 + 4;
+        doc.setFontSize(12);
+        doc.setTextColor(185, 30, 113);
+        const answerLines = doc.splitTextToSize(`Answer: ${entry.answer}`, maxWidth);
+        doc.text(answerLines, margin + 5, y);
+        y += answerLines.length * 6 + 4;
 
-    // Tip  
-if (entry.tip) {
-  doc.setFontSize(11);
-  doc.setTextColor(105, 105, 105);
-  const cleanTip = formatHTMLtoText(entry.tip);  // ✅ Apply formatting here
-  const tipLines = doc.splitTextToSize(`Tip: ${cleanTip}`, maxWidth);
-  doc.text(tipLines, margin + 10, y);
-  y += tipLines.length * 6 + 4;
-}
+        if (entry.tip) {
+          doc.setFontSize(11);
+          doc.setTextColor(105, 105, 105);
+          const cleanTip = formatHTMLtoText(entry.tip);
+          const tipLines = doc.splitTextToSize(`Tip: ${cleanTip}`, maxWidth);
+          doc.text(tipLines, margin + 10, y);
+          y += tipLines.length * 6 + 4;
+        }
 
-    // Issue/comment
-    if (entry.issue) {
-      doc.setFontSize(11);
-      doc.setTextColor(0, 0, 0);
-      const issueLines = doc.splitTextToSize(`User comment: ${entry.issue}`, maxWidth);
-      doc.text(issueLines, margin + 10, y);
-      y += issueLines.length * 6 + 6;
-    }
+        if (entry.issue) {
+          doc.setFontSize(11);
+          doc.setTextColor(0, 0, 0);
+          const issueLines = doc.splitTextToSize(`User comment: ${entry.issue}`, maxWidth);
+          doc.text(issueLines, margin + 10, y);
+          y += issueLines.length * 6 + 6;
+        }
 
-    // Page break check
-    if (y > 270) {
-      doc.addPage();
-      y = 20;
-    }
-  });
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+      });
 
-       const pageCount = doc.internal.getNumberOfPages();
+      const pageCount = doc.internal.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
         doc.setFontSize(10);
