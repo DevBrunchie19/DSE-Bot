@@ -376,15 +376,15 @@ const questionLines = doc.splitTextToSize(`${i + 1}. ${cleanQuestion}`, maxWidth
     doc.text(answerLines, margin + 5, y);
     y += answerLines.length * 6 + 4;
 
-    // Tip
-    if (entry.tip) {
-      doc.setFontSize(11);
-      doc.setTextColor(105, 105, 105);
-      const cleanTip = formatHTMLtoText(entry.tip);
-      const tipLines = doc.splitTextToSize(`Tip: ${entry.tip}`, maxWidth);
-      doc.text(tipLines, margin + 10, y);
-      y += tipLines.length * 6 + 4;
-    }
+    // Tip  
+if (entry.tip) {
+  doc.setFontSize(11);
+  doc.setTextColor(105, 105, 105);
+  const cleanTip = formatHTMLtoText(entry.tip);  // ✅ Apply formatting here
+  const tipLines = doc.splitTextToSize(`Tip: ${cleanTip}`, maxWidth);
+  doc.text(tipLines, margin + 10, y);
+  y += tipLines.length * 6 + 4;
+}
 
     // Issue/comment
     if (entry.issue) {
