@@ -318,18 +318,18 @@ function formatHTMLtoText(html) {
         if (entry.issue) appendMessage("User note: " + entry.issue, 'user');
       });
       controls.innerHTML = `
-        // <button onclick="restartBot()">Restart</button>
+        //<button onclick="restartBot()">Restart</button>
         <button onclick="downloadPDF()">Download Summary</button>
       `;
     }
 
-    function restartBot() {
+   /* function restartBot() {
       messages.innerHTML = '';
       welcomeMessage.innerHTML = "Hi! I'm <strong>ErgoBot</strong>. Let's go through a quick office ergonomics self-check.";
       userAnswers = [];
       currentQuestion = 0;
       showQuestion();
-    }
+    } */
 
     async function downloadPDF() {
       const { jsPDF } = window.jspdf;
