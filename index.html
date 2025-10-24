@@ -106,16 +106,16 @@ function formatHTMLtoText(html) {
   const tempDiv = document.createElement("div");
   tempDiv.innerHTML = html;
 
-  // Convert <li> to bullet points
+  // Convert <li> to bullet points in PDF
   const listItems = tempDiv.querySelectorAll("li");
   listItems.forEach(li => {
     li.textContent = `• ${li.textContent}`;
   });
 
-  // Replace <br> with newlines
+  // Replace <br> with newlines in PDF
   tempDiv.innerHTML = tempDiv.innerHTML.replace(/<br\s*\/?>/gi, '\n');
 
-  // Remove all other tags
+  // Remove all other tags in PDF
   return tempDiv.textContent || tempDiv.innerText || "";
 }
     
@@ -318,7 +318,7 @@ function formatHTMLtoText(html) {
         if (entry.issue) appendMessage("User note: " + entry.issue, 'user');
       });
       controls.innerHTML = `
-        <button onclick="restartBot()">Restart</button>
+        // <button onclick="restartBot()">Restart</button>
         <button onclick="downloadPDF()">Download Summary</button>
       `;
     }
