@@ -338,30 +338,28 @@ function formatHTMLtoText(html) {
     }
 
     async function handleFollowUpAnswer(needsNewItem) {
-      const q = questions[currentQuestion];
-      appendMessage(needsNewItem ? "Yes" : "No", 'user');
-      controls.innerHTML = '';
+  const q = questions[currentQuestion];
+  appendMessage(needsNewItem ? "Yes" : "No", 'user');
+  controls.innerHTML = '';
 
-      await showTyping();
+  await showTyping();
 
-      if (needsNewItem) {
-        appendMessage("Okay, this will be noted in your report so a replacement can be arranged.", 'bot');
-      } else {
-        appendMessage("Got it, we'll just note that no replacement is needed.", 'bot');
-      }
-
-      userAnswers.push({
-        question: q.text,
-        answer: "No (unresolved)",
-        tip: q.extraTip || q.tip,
-        image: q.image,
-        issue: needsNewItem
-          ? `User indicated they need a new ${q.followUp.field.replace('new', '').toLowerCase()}.`
-          : "User indicated no replacement needed."
-      });
-
-      controls.innerHTML = `<button onclick="nextQuestion()">Next Question</button>`;
-    }
+  if (needsNewItem) {
+    appendMessage("Okay, this will be noted in your report so a replacement can be arranged.", 'bot');
+    userAnswers.push({
+      question: q.text,
+      answer: "No (unresolved)",
+      tip: q.extraTip || q.tip,
+      image: q.image,
+      issue: `User indicated they need a new ${q.followUp.field.replace('new', '').toLowerCase()}.`
+    });
+    controls.innerHTML = `<button onclick="nextQuestion()">Next Question</button>`;
+  } else {
+    appendMessage("Got it, we'll just note that no replacement is needed.", 'bot');
+    await showTyping();
+    await askForIssue(q); // 👈 This is new — ask for a text description next
+  }
+}
     // --- END NEW CODE ---
 
     async function askForIssue(q) {
