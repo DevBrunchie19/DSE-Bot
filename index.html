@@ -126,12 +126,20 @@ function formatHTMLtoText(html) {
       {
         text: "Are the characters on your keyboard clear and readable?",
         tip: "Clean your keyboard using the wipes provided at workstations. If characters still can’t be read, the keyboard may need modifying or replacing. Use a keyboard with a matt finish to reduce glare and/or reflection.",
-     extraTip: "If that hasn't resolved the issue you can speak to your manager about requiring a new keyboard.",
+        extraTip: "If that hasn't resolved the issue you can speak to your manager about requiring a new keyboard.",
+        followUp: {
+          text: "Do you need a new keyboard?",
+          field: "newKeyboard"
+        }
       },
       {
         text: "Is the mouse you use suitable for the tasks you do?",
         tip: "Different shapes and sizes of mouse are available. Or, an alternative device such as a tablet may suit your task.",
-     extraTip: "To get a different mouse or an alternative device, discus with your line manager to find the best device for your needs.",
+        extraTip: "To get a different mouse or an alternative device, discus with your line manager to find the best device for your needs.",
+        followUp: {
+          text: "Do you need a new mouse?",
+          field: "newMouse"
+        }
       },
       {
         text: "Do you hold the mouse close to the keyboard as shown in the first picture? <br> Check you meet this guidance:<ul><li>Most devices are best placed as close as possible to the keyboard</li><li>Arm should not overreach</li><li>Users should not leave their hand on the device when not in use (hovering)</li><li>User should have a relaxed arm and straight wrist</li></ul>",
@@ -289,7 +297,7 @@ function formatHTMLtoText(html) {
             <button onclick="handleExtraTipHelp(false)">No</button>
           `;
         } else {
-          await askForIssue(q);
+          await askFollowUp(q);
         }
       }
     }
@@ -311,9 +319,52 @@ function formatHTMLtoText(html) {
         });
         controls.innerHTML = `<button onclick="nextQuestion()">Next Question</button>`;
       } else {
-        await askForIssue(q);
+        await askFollowUp(q);
       }
     }
+
+    // --- NEW CODE FOR FOLLOW-UP QUESTIONS ---
+    async function askFollowUp(q) {
+      if (!q.followUp) {
+        await askForIssue(q);
+        return;
+      }
+
+      await showTyping();
+      appendMessage(q.followUp.text, 'bot');
+
+      controls.innerHTML = `
+        <button onclick="handleFollowUpAnswer(true)">Yes</button>
+        <button onclick="handleFollowUpAnswer(false)">No</button>
+      `;
+    }
+
+    async function handleFollowUpAnswer(needsNewItem) {
+      const q = questions[currentQuestion];
+      appendMessage(needsNewItem ? "Yes" : "No", 'user');
+      controls.innerHTML = '';
+
+      await showTyping();
+
+      if (needsNewItem) {
+        appendMessage("Okay, this will be noted in your report so a replacement can be arranged.", 'bot');
+      } else {
+        appendMessage("Got it, we'll just note that no replacement is needed.", 'bot');
+      }
+
+      userAnswers.push({
+        question: q.text,
+        answer: "No (unresolved)",
+        tip: q.extraTip || q.tip,
+        image: q.image,
+        issue: needsNewItem
+          ? `User indicated they need a new ${q.followUp.field.replace('new', '').toLowerCase()}.`
+          : "User indicated no replacement needed."
+      });
+
+      controls.innerHTML = `<button onclick="nextQuestion()">Next Question</button>`;
+    }
+    // --- END NEW CODE ---
 
     async function askForIssue(q) {
       await showTyping();
@@ -446,5 +497,6 @@ function formatHTMLtoText(html) {
 
     showQuestion();
   </script>
+
 </body>
 </html>
