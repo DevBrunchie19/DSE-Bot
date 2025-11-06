@@ -99,20 +99,17 @@
     const welcomeMessage = document.getElementById('welcome');
     document.getElementById('chatbox').style.display = 'none';
 
-function formatHTMLtoText(html) {
-  const tempDiv = document.createElement("div");
-  tempDiv.innerHTML = html;
+    function formatHTMLtoText(html) {
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = html;
+      const listItems = tempDiv.querySelectorAll("li");
+      listItems.forEach(li => {
+        li.textContent = `• ${li.textContent}`;
+      });
+      tempDiv.innerHTML = tempDiv.innerHTML.replace(/<br\s*\/?>/gi, '\n');
+      return tempDiv.textContent || tempDiv.innerText || "";
+    }
 
-  const listItems = tempDiv.querySelectorAll("li");
-  listItems.forEach(li => {
-    li.textContent = `• ${li.textContent}`;
-  });
-
-  tempDiv.innerHTML = tempDiv.innerHTML.replace(/<br\s*\/?>/gi, '\n');
-
-  return tempDiv.textContent || tempDiv.innerText || "";
-}
-    
     const questions = [
       {
         text: "Can you find a comfortable keying position? (As seen in image below). You should sit upright and have room to rest your palms or wrists on the desk to provide support.",
@@ -151,15 +148,15 @@ function formatHTMLtoText(html) {
       {
         text: "Does the mouse work smoothly at a speed that suits you?",
         tip: "Clean the mouse. <br> <ul><li>A roller ball mouse collects desk debris and needs regular cleaning</li><li>A light operated mouse collects dust on the feet and in the light recess; they may also react differently on polished /matt surfaces</li></ul>",
-      followUp: {
+        followUp: {
           text: "Do you require a replacement mouse?",
           field: "newMouse"
         }
       },
-       {
+      {
         text: "Placeholder for next question",
         tip: "Placeholder for first stage help",
-       extraTip: "Placeholder for second stage help",
+        extraTip: "Placeholder for second stage help",
       },
     ];
 
@@ -181,9 +178,7 @@ function formatHTMLtoText(html) {
       typing.innerText = "ErgoBot is typing...";
       messages.appendChild(typing);
       messages.scrollTop = messages.scrollHeight;
-
       const delay = Math.min(3000, Math.max(400, text.length * speed));
-
       return new Promise(resolve => {
         setTimeout(() => {
           typing.remove();
@@ -197,7 +192,6 @@ function formatHTMLtoText(html) {
       msg.className = 'message ' + sender;
       msg.innerHTML = text;
       messages.appendChild(msg);
-
       if (image) {
         const img = document.createElement('img');
         img.src = image;
@@ -213,27 +207,22 @@ function formatHTMLtoText(html) {
       const baseField = document.getElementById('Base/site');
       const jobField = document.getElementById('Job title');
       const deskField = document.getElementById('Desk number (if appropriate)');
-
       userInfo = {
         name: nameField.value.trim(),
         base: baseField.value.trim(),
         job: jobField.value.trim(),
         desk: deskField.value.trim()
       };
-
       [nameField, baseField, jobField].forEach(f => f.style.borderColor = '#ccc');
-
       let missing = [];
       if (!userInfo.name) missing.push(nameField);
       if (!userInfo.base) missing.push(baseField);
       if (!userInfo.job) missing.push(jobField);
-
       if (missing.length > 0) {
         missing.forEach(f => f.style.borderColor = 'red');
         alert("⚠️ Please fill in all required fields before starting.");
         return;
       }
-
       document.getElementById('userInfoForm').style.display = 'none';
       document.getElementById('chatbox').style.display = 'block';
       showQuestion();
@@ -259,7 +248,6 @@ function formatHTMLtoText(html) {
       const q = questions[currentQuestion];
       controls.innerHTML = '';
       appendMessage(isYes ? "Yes" : "No", 'user');
-
       if (isYes) {
         userAnswers.push({ question: q.text, answer: "Yes", tip: null, image: null, issue: null });
         await showTyping();
@@ -282,7 +270,6 @@ function formatHTMLtoText(html) {
       const q = questions[currentQuestion];
       controls.innerHTML = '';
       appendMessage(helped ? "Yes" : "No", 'user');
-
       if (helped) {
         await showTyping();
         appendMessage("Great! Glad that helped.", 'bot');
@@ -310,7 +297,6 @@ function formatHTMLtoText(html) {
       const q = questions[currentQuestion];
       controls.innerHTML = '';
       appendMessage(helped ? "Yes" : "No", 'user');
-
       if (helped) {
         await showTyping();
         appendMessage("Fantastic! Glad that worked.", 'bot');
@@ -327,16 +313,13 @@ function formatHTMLtoText(html) {
       }
     }
 
-    // --- NEW CODE FOR FOLLOW-UP QUESTIONS ---
     async function askFollowUp(q) {
       if (!q.followUp) {
         await askForIssue(q);
         return;
       }
-
       await showTyping();
       appendMessage(q.followUp.text, 'bot');
-
       controls.innerHTML = `
         <button onclick="handleFollowUpAnswer(true)">Yes</button>
         <button onclick="handleFollowUpAnswer(false)">No</button>
@@ -344,29 +327,26 @@ function formatHTMLtoText(html) {
     }
 
     async function handleFollowUpAnswer(needsNewItem) {
-  const q = questions[currentQuestion];
-  appendMessage(needsNewItem ? "Yes" : "No", 'user');
-  controls.innerHTML = '';
-
-  await showTyping();
-
-  if (needsNewItem) {
-    appendMessage("Okay, this will be noted in your report so a replacement can be arranged.", 'bot');
-    userAnswers.push({
-      question: q.text,
-      answer: "No (unresolved)",
-      tip: q.extraTip || q.tip,
-      image: q.image,
-      issue: `User indicated they need a new ${q.followUp.field.replace('new', '').toLowerCase()}.`
-    });
-    controls.innerHTML = `<button onclick="nextQuestion()">Next Question</button>`;
-  } else {
-    appendMessage("Got it, we'll just note that no replacement is needed.", 'bot');
-    await showTyping();
-    await askForIssue(q); // 👈 This is new — ask for a text description next
-  }
-}
-    // --- END NEW CODE ---
+      const q = questions[currentQuestion];
+      appendMessage(needsNewItem ? "Yes" : "No", 'user');
+      controls.innerHTML = '';
+      await showTyping();
+      if (needsNewItem) {
+        appendMessage("Okay, this will be noted in your report so a replacement can be arranged.", 'bot');
+        userAnswers.push({
+          question: q.text,
+          answer: "No (unresolved)",
+          tip: q.extraTip || q.tip,
+          image: q.image,
+          issue: `User indicated they need a new ${q.followUp.field.replace('new', '').toLowerCase()}.`
+        });
+        controls.innerHTML = `<button onclick="nextQuestion()">Next Question</button>`;
+      } else {
+        appendMessage("Got it, we'll just note that no replacement is needed.", 'bot');
+        await showTyping();
+        await askForIssue(q);
+      }
+    }
 
     async function askForIssue(q) {
       await showTyping();
@@ -375,7 +355,6 @@ function formatHTMLtoText(html) {
       textarea.placeholder = "Type here...";
       textarea.rows = 3;
       controls.appendChild(textarea);
-
       const submitBtn = document.createElement('button');
       submitBtn.textContent = "Submit Issue";
       submitBtn.onclick = async () => {
@@ -420,85 +399,57 @@ function formatHTMLtoText(html) {
       `;
     }
 
+    /* ---------------------------
+       UPDATED PDF GENERATION CODE
+    ---------------------------- */
+
+    function addPageHeader(doc, userInfo) {
+      const margin = 20;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      doc.setFontSize(10);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`ErgoBot Self-Check for ${userInfo.name}`, margin, 10);
+      doc.line(margin, 12, pageWidth - margin, 12);
+    }
+
+    function addTextBlock(doc, textLines, margin, y, maxWidth, lineHeight = 6) {
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const availableHeight = pageHeight - 30; // leave space for footer
+      for (let i = 0; i < textLines.length; i++) {
+        if (y + lineHeight > availableHeight) {
+          doc.addPage();
+          addPageHeader(doc, userInfo);
+          y = 25;
+        }
+        doc.text(textLines[i], margin, y);
+        y += lineHeight;
+      }
+      return y;
+    }
+
     async function downloadPDF() {
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
+      const doc = new jsPDF({ compress: true });
       doc.setProperties({
         title: `ErgoBot Self-Check - ${userInfo.name}`,
         author: userInfo.name || "ErgoBot"
       });
-      
+
       const pageWidth = doc.internal.pageSize.getWidth();
       const margin = 20;
       const maxWidth = pageWidth - margin * 2;
-      let y = 20;
-      
+      let y = 25;
+
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(18);
       doc.setTextColor(185, 30, 113);
       doc.text("ErgoBot Self-Check Summary", margin, y);
       y += 10;
 
+      doc.setFont("helvetica", "normal");
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
-      doc.text(`Name: ${userInfo.name}`, margin, (y += 7));
-      doc.text(`Base: ${userInfo.base}`, margin, (y += 7));
-      doc.text(`Job title: ${userInfo.job}`, margin, (y += 7));
-      doc.text(`Desk: ${userInfo.desk}`, margin, (y += 7));
-
-      doc.line(margin, (y += 5), pageWidth - margin, y);
-      y += 10;
-
-      userAnswers.forEach((entry, i) => {
-        doc.setFontSize(13);
-        doc.setTextColor(0, 0, 0);
-        const cleanQuestion = formatHTMLtoText(entry.question);
-        const questionLines = doc.splitTextToSize(`${i + 1}. ${cleanQuestion}`, maxWidth);
-        doc.text(questionLines, margin, y);
-        y += questionLines.length * 6 + 4;
-
-        doc.setFontSize(12);
-        doc.setTextColor(185, 30, 113);
-        const answerLines = doc.splitTextToSize(`Answer: ${entry.answer}`, maxWidth);
-        doc.text(answerLines, margin + 5, y);
-        y += answerLines.length * 6 + 4;
-
-        if (entry.tip) {
-          doc.setFontSize(11);
-          doc.setTextColor(105, 105, 105);
-          const cleanTip = formatHTMLtoText(entry.tip);
-          const tipLines = doc.splitTextToSize(`Tip: ${cleanTip}`, maxWidth);
-          doc.text(tipLines, margin + 10, y);
-          y += tipLines.length * 6 + 4;
-        }
-
-        if (entry.issue) {
-          doc.setFontSize(11);
-          doc.setTextColor(0, 0, 0);
-          const issueLines = doc.splitTextToSize(`User comment: ${entry.issue}`, maxWidth);
-          doc.text(issueLines, margin + 10, y);
-          y += issueLines.length * 6 + 6;
-        }
-
-        if (y > 270) {
-          doc.addPage();
-          y = 20;
-        }
-      });
-
-      const pageCount = doc.internal.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(10);
-        doc.setTextColor(120, 120, 120);
-        doc.text("Generated by ErgoBot", 20, 285);
-        doc.text(`Page ${i} of ${pageCount}`, 190, 285, { align: "right" });
-      }
-
-      doc.save(`ErgoBot_SelfCheck_${userInfo.name}.pdf`);
-    }
-
-    showQuestion();
-  </script>
-
-</body>
-</html>
+      const details = [
+        `Name: ${userInfo.name}`,
+        `Base: ${userInfo.base}`,
+        `Job title: ${user
