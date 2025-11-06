@@ -514,14 +514,14 @@
           y += 2;
 
           // Tip
-          if (entry.tip) {
+         /* if (entry.tip) {
             doc.setFontSize(10);
             doc.setTextColor(90, 90, 90);
             const tipText = `Tip: ${formatHTMLtoText(entry.tip)}`;
             const tLines = doc.splitTextToSize(tipText, maxWidth - 20);
             y = addTextBlock(doc, tLines, margin + 10, y, lineHeight);
             y += 2;
-          }
+          }*/
 
           // Issue / user comment
           if (entry.issue) {
