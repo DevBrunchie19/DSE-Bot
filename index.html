@@ -406,12 +406,13 @@
 function addPageHeader(doc, userInfo, margin = 20) {
   const pageWidth = doc.internal.pageSize.getWidth();
 
-  // draw the grey header text + line only
+  // --- draw the header only (do not affect main text styles) ---
+  doc.saveGraphicsState?.();
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(150, 150, 150);
 
-  const headerText = userInfo && userInfo.name
+  const headerText = userInfo?.name
     ? `ErgoBot Self-Check for ${userInfo.name}`
     : `ErgoBot Self-Check`;
 
@@ -419,36 +420,35 @@ function addPageHeader(doc, userInfo, margin = 20) {
   doc.setDrawColor(220);
   doc.line(margin, 14, pageWidth - margin, 14);
   doc.setDrawColor(0);
-
-  // do NOT alter font size or color for body text
+  doc.restoreGraphicsState?.();
 }
 
-    
 function addTextBlock(doc, textLines, margin, y, lineHeight = 6) {
   const pageHeight = doc.internal.pageSize.getHeight();
   const footerReserve = 18;
   const availableHeight = pageHeight - footerReserve;
 
-  // capture current style so we can restore it after page breaks
+  // Capture current text style so it can be restored after new pages
   const currentFont = doc.getFont();
   const currentFontSize = doc.internal.getFontSize();
+  // jsPDF has no getter for current color; we store our own copy
   const currentColor = doc.__currentColor || [0, 0, 0];
 
   for (let i = 0; i < textLines.length; i++) {
     if (y + lineHeight > availableHeight) {
+      // --- Page break ---
       doc.addPage();
       addPageHeader(doc, userInfo, margin);
       y = 25;
 
-      // restore previous font settings
+      // --- Restore whatever font/color were active before page break ---
       doc.setFont(currentFont.fontName || "helvetica", currentFont.fontStyle || "normal");
       doc.setFontSize(currentFontSize);
       doc.setTextColor(...currentColor);
     }
 
-    // track the color for next use
-    const tc = doc.__currentColor || currentColor;
-    doc.__currentColor = tc;
+    // Update tracked color for subsequent loops
+    doc.__currentColor = currentColor;
 
     doc.text(textLines[i], margin, y);
     y += lineHeight;
