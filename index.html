@@ -81,9 +81,9 @@
     <h3 style="color:#b91e71;">Before we begin</h3>
     <p>Please fill out your details:</p>
     <input id="Name" placeholder="Your name">
-    <input id="Base/site" placeholder="Base/site">
+    <input id="baseSite" placeholder="Base/site">
     <input id="Job title" placeholder="Job title">
-    <input id="Desk number (if appropriate)" placeholder="Desk number (if applicable)">
+    <input id="deskNumber" placeholder="Desk number (if applicable)">
     <button onclick="startAssessment()">Start Self-Check</button>
   </div>
 
@@ -204,25 +204,30 @@
 
     function startAssessment() {
       const nameField = document.getElementById('Name');
-      const baseField = document.getElementById('Base/site');
+      const baseField = document.getElementById('baseSite');
       const jobField = document.getElementById('Job title');
-      const deskField = document.getElementById('Desk number (if appropriate)');
+      const deskField = document.getElementById('deskNumber');
+
       userInfo = {
         name: nameField.value.trim(),
         base: baseField.value.trim(),
         job: jobField.value.trim(),
         desk: deskField.value.trim()
       };
+
       [nameField, baseField, jobField].forEach(f => f.style.borderColor = '#ccc');
+
       let missing = [];
       if (!userInfo.name) missing.push(nameField);
       if (!userInfo.base) missing.push(baseField);
       if (!userInfo.job) missing.push(jobField);
+
       if (missing.length > 0) {
         missing.forEach(f => f.style.borderColor = 'red');
         alert("⚠️ Please fill in all required fields before starting.");
         return;
       }
+
       document.getElementById('userInfoForm').style.display = 'none';
       document.getElementById('chatbox').style.display = 'block';
       showQuestion();
@@ -406,7 +411,6 @@
 function addPageHeader(doc, userInfo, margin = 20) {
   const pageWidth = doc.internal.pageSize.getWidth();
 
-  // Header text (grey)
   doc.saveGraphicsState?.();
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
@@ -428,25 +432,21 @@ function addTextBlock(doc, textLines, margin, y, lineHeight = 6) {
   const footerReserve = 18;
   const availableHeight = pageHeight - footerReserve;
 
-  // Capture current text style
   const currentFont = doc.getFont();
   const currentFontSize = doc.internal.getFontSize();
-  const currentColor = doc.__currentColor || [0, 0, 0]; // fallback to black
+  const currentColor = doc.__currentColor || [0, 0, 0];
 
   for (let i = 0; i < textLines.length; i++) {
-    // Need a new page?
     if (y + lineHeight > availableHeight) {
       doc.addPage();
       addPageHeader(doc, userInfo, margin);
       y = 25;
 
-      // Restore previous font + color exactly
       doc.setFont(currentFont.fontName || "helvetica", currentFont.fontStyle || "normal");
       doc.setFontSize(currentFontSize);
       doc.setTextColor(...currentColor);
     }
 
-    // Draw the line
     doc.text(textLines[i], margin, y);
     y += lineHeight;
   }
@@ -469,14 +469,11 @@ function addFooterToAllPages(doc, margin = 20) {
   }
 }
 
-
-
-// Whenever you set a text color in your PDF creation logic (e.g. before writing a question or answer),
-// call this tiny helper to “remember” it for later restoration:
 function setTextColorTracked(doc, r, g, b) {
   doc.setTextColor(r, g, b);
   doc.__currentColor = [r, g, b];
 }
+
     async function downloadPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ compress: true });
@@ -488,17 +485,15 @@ function setTextColorTracked(doc, r, g, b) {
       const pageWidth = doc.internal.pageSize.getWidth();
       const margin = 20;
       const maxWidth = pageWidth - margin * 2;
-      let y = 25; // starting y after header/title area
+      let y = 25;
       const lineHeight = 6;
 
-      // Title
       doc.setFont("helvetica", "bold");
       doc.setFontSize(18);
       doc.setTextColor(185, 30, 113);
       doc.text("ErgoBot Self-Check Summary", margin, y);
       y += 8;
 
-      // User details
       doc.setFont("helvetica", "normal");
       doc.setFontSize(11);
       doc.setTextColor(0, 0, 0);
@@ -513,88 +508,63 @@ function setTextColorTracked(doc, r, g, b) {
         y = addTextBlock(doc, lines, margin, y, lineHeight);
       });
 
-      // horizontal rule
       y += 4;
       doc.setDrawColor(220);
       doc.line(margin, y, pageWidth - margin, y);
       doc.setDrawColor(0);
       y += 8;
 
-      // If no answers, print a friendly message
       if (!userAnswers || userAnswers.length === 0) {
         const noResp = doc.splitTextToSize("No responses were recorded during this session.", maxWidth);
         y = addTextBlock(doc, noResp, margin, y, lineHeight);
-      } else {// iterate answers
-userAnswers.forEach((entry, idx) => {
-  // Question
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(14);
-  setTextColorTracked(doc, 0, 0, 0); // 🟢 track question color
-  const questionText = `${idx + 1}. ${formatHTMLtoText(entry.question)}`;
-  const qLines = doc.splitTextToSize(questionText, maxWidth);
-  y = addTextBlock(doc, qLines, margin, y, lineHeight);
-  y += 2;
+      } else {
+        userAnswers.forEach((entry, idx) => {
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(14);
+          setTextColorTracked(doc, 0, 0, 0);
+          const questionText = `${idx + 1}. ${formatHTMLtoText(entry.question)}`;
+          const qLines = doc.splitTextToSize(questionText, maxWidth);
+          y = addTextBlock(doc, qLines, margin, y, lineHeight);
+          y += 2;
 
-  // Answer
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(12);
-  setTextColorTracked(doc, 185, 30, 113); // 🟣 track pink answer color
-  const answerText = `Answer: ${entry.answer || ""}`;
-  const aLines = doc.splitTextToSize(answerText, maxWidth - 10);
-  y = addTextBlock(doc, aLines, margin + 5, y, lineHeight);
-  y += 2;
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(12);
+          setTextColorTracked(doc, 185, 30, 113);
+          const answerText = `Answer: ${entry.answer || ""}`;
+          const aLines = doc.splitTextToSize(answerText, maxWidth - 10);
+          y = addTextBlock(doc, aLines, margin + 5, y, lineHeight);
+          y += 2;
 
-  // Tip (optional – uncomment if needed)
-  /*
-  if (entry.tip) {
-    doc.setFontSize(10);
-    setTextColorTracked(doc, 90, 90, 90); // 🟤 track grey tip color
-    const tipText = `Tip: ${formatHTMLtoText(entry.tip)}`;
-    const tLines = doc.splitTextToSize(tipText, maxWidth - 20);
-    y = addTextBlock(doc, tLines, margin + 10, y, lineHeight);
-    y += 2;
-  }
-  */
+          if (entry.issue) {
+            doc.setFontSize(10);
+            setTextColorTracked(doc, 0, 0, 0);
+            const issueText = `User comment: ${entry.issue}`;
+            const iLines = doc.splitTextToSize(issueText, maxWidth - 20);
+            y = addTextBlock(doc, iLines, margin + 10, y, lineHeight);
+            y += 4;
+          }
 
-  // Issue / user comment
-  if (entry.issue) {
-    doc.setFontSize(10);
-    setTextColorTracked(doc, 0, 0, 0); // ⚫ back to black
-    const issueText = `User comment: ${entry.issue}`;
-    const iLines = doc.splitTextToSize(issueText, maxWidth - 20);
-    y = addTextBlock(doc, iLines, margin + 10, y, lineHeight);
-    y += 4;
-  }
-
-  // separator between entries
-  doc.setDrawColor(235);
-  const pageHeight = doc.internal.pageSize.getHeight();
-  if (y + 8 > pageHeight - 18) {
-    doc.addPage();
-    addPageHeader(doc, userInfo, margin);
-    y = 25;
-  }
-  doc.line(margin, y, pageWidth - margin, y);
-  doc.setDrawColor(0);
-  y += 10;
-});
+          doc.setDrawColor(235);
+          const pageHeight = doc.internal.pageSize.getHeight();
+          if (y + 8 > pageHeight - 18) {
+            doc.addPage();
+            addPageHeader(doc, userInfo, margin);
+            y = 25;
+          }
+          doc.line(margin, y, pageWidth - margin, y);
+          doc.setDrawColor(0);
+          y += 10;
+        });
       }
 
-      // Add headers to first page (if not present) and ensure header exists for pages created after content
-      // We intentionally add header to page 1 in case no addPageHeader got called
       doc.setPage(1);
       addPageHeader(doc, userInfo, margin);
 
-      // Add footer to all pages
       addFooterToAllPages(doc, margin);
 
-      // Save file
       const safeName = (userInfo.name || "ErgoBot").replace(/[^\w\-]+/g, "_");
       doc.save(`ErgoBot_SelfCheck_${safeName}.pdf`);
     }
-
-    // Start hidden initial call removed - showQuestion only after startAssessment
-    // showQuestion();
 
   </script>
 
