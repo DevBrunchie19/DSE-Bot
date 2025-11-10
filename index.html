@@ -80,10 +80,13 @@
   <div id="userInfoForm" style="max-width:600px;margin:auto;background:white;padding:15px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.1);margin-bottom:20px;">
     <h3 style="color:#b91e71;">Before we begin</h3>
     <p>Please fill out your details:</p>
-    <input id="Name" placeholder="Your name">
-    <input id="baseSite" placeholder="Base/site">
-    <input id="Job title" placeholder="Job title">
-    <input id="deskNumber" placeholder="Desk number (if applicable)">
+
+    <!-- ✅ Updated input fields with aria-labels -->
+    <input id="Name" placeholder="Your name" aria-label="Your full name" required>
+    <input id="baseSite" placeholder="Base/site" aria-label="Your base or work site" required>
+    <input id="Job title" placeholder="Job title" aria-label="Your job title" required>
+    <input id="deskNumber" placeholder="Desk number (if applicable)" aria-label="Your desk number if applicable">
+
     <button onclick="startAssessment()">Start Self-Check</button>
   </div>
 
@@ -207,27 +210,22 @@
       const baseField = document.getElementById('baseSite');
       const jobField = document.getElementById('Job title');
       const deskField = document.getElementById('deskNumber');
-
       userInfo = {
         name: nameField.value.trim(),
         base: baseField.value.trim(),
         job: jobField.value.trim(),
         desk: deskField.value.trim()
       };
-
       [nameField, baseField, jobField].forEach(f => f.style.borderColor = '#ccc');
-
       let missing = [];
       if (!userInfo.name) missing.push(nameField);
       if (!userInfo.base) missing.push(baseField);
       if (!userInfo.job) missing.push(jobField);
-
       if (missing.length > 0) {
         missing.forEach(f => f.style.borderColor = 'red');
         alert("⚠️ Please fill in all required fields before starting.");
         return;
       }
-
       document.getElementById('userInfoForm').style.display = 'none';
       document.getElementById('chatbox').style.display = 'block';
       showQuestion();
@@ -404,75 +402,71 @@
       `;
     }
 
-   /* ---------------------------
-   PDF FUNCTIONS
----------------------------- */
+    function addPageHeader(doc, userInfo, margin = 20) {
+      const pageWidth = doc.internal.pageSize.getWidth();
 
-function addPageHeader(doc, userInfo, margin = 20) {
-  const pageWidth = doc.internal.pageSize.getWidth();
+      doc.saveGraphicsState?.();
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(150, 150, 150);
 
-  doc.saveGraphicsState?.();
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.setTextColor(150, 150, 150);
+      const headerText = userInfo?.name
+        ? `ErgoBot Self-Check for ${userInfo.name}`
+        : `ErgoBot Self-Check`;
 
-  const headerText = userInfo?.name
-    ? `ErgoBot Self-Check for ${userInfo.name}`
-    : `ErgoBot Self-Check`;
-
-  doc.text(headerText, margin, 12);
-  doc.setDrawColor(220);
-  doc.line(margin, 14, pageWidth - margin, 14);
-  doc.setDrawColor(0);
-  doc.restoreGraphicsState?.();
-}
-
-function addTextBlock(doc, textLines, margin, y, lineHeight = 6) {
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const footerReserve = 18;
-  const availableHeight = pageHeight - footerReserve;
-
-  const currentFont = doc.getFont();
-  const currentFontSize = doc.internal.getFontSize();
-  const currentColor = doc.__currentColor || [0, 0, 0];
-
-  for (let i = 0; i < textLines.length; i++) {
-    if (y + lineHeight > availableHeight) {
-      doc.addPage();
-      addPageHeader(doc, userInfo, margin);
-      y = 25;
-
-      doc.setFont(currentFont.fontName || "helvetica", currentFont.fontStyle || "normal");
-      doc.setFontSize(currentFontSize);
-      doc.setTextColor(...currentColor);
+      doc.text(headerText, margin, 12);
+      doc.setDrawColor(220);
+      doc.line(margin, 14, pageWidth - margin, 14);
+      doc.setDrawColor(0);
+      doc.restoreGraphicsState?.();
     }
 
-    doc.text(textLines[i], margin, y);
-    y += lineHeight;
-  }
+    function addTextBlock(doc, textLines, margin, y, lineHeight = 6) {
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const footerReserve = 18;
+      const availableHeight = pageHeight - footerReserve;
 
-  return y;
-}
+      const currentFont = doc.getFont();
+      const currentFontSize = doc.internal.getFontSize();
+      const currentColor = doc.__currentColor || [0, 0, 0];
 
-function addFooterToAllPages(doc, margin = 20) {
-  const pageCount = doc.internal.getNumberOfPages();
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
+      for (let i = 0; i < textLines.length; i++) {
+        if (y + lineHeight > availableHeight) {
+          doc.addPage();
+          addPageHeader(doc, userInfo, margin);
+          y = 25;
 
-  for (let p = 1; p <= pageCount; p++) {
-    doc.setPage(p);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(120, 120, 120);
-    doc.text("Generated by ErgoBot", margin, pageHeight - 8);
-    doc.text(`Page ${p} of ${pageCount}`, pageWidth - margin, pageHeight - 8, { align: "right" });
-  }
-}
+          doc.setFont(currentFont.fontName || "helvetica", currentFont.fontStyle || "normal");
+          doc.setFontSize(currentFontSize);
+          doc.setTextColor(...currentColor);
+        }
 
-function setTextColorTracked(doc, r, g, b) {
-  doc.setTextColor(r, g, b);
-  doc.__currentColor = [r, g, b];
-}
+        doc.text(textLines[i], margin, y);
+        y += lineHeight;
+      }
+
+      return y;
+    }
+
+    function addFooterToAllPages(doc, margin = 20) {
+      const pageCount = doc.internal.getNumberOfPages();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      for (let p = 1; p <= pageCount; p++) {
+        doc.setPage(p);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(120, 120, 120);
+        doc.text("Generated by ErgoBot", margin, pageHeight - 8);
+        doc.text(`Page ${p} of ${pageCount}`, pageWidth - margin, pageHeight - 8, { align: "right" });
+      }
+    }
+
+    function setTextColorTracked(doc, r, g, b) {
+      doc.setTextColor(r, g, b);
+      doc.__currentColor = [r, g, b];
+    }
 
     async function downloadPDF() {
       const { jsPDF } = window.jspdf;
@@ -565,7 +559,6 @@ function setTextColorTracked(doc, r, g, b) {
       const safeName = (userInfo.name || "ErgoBot").replace(/[^\w\-]+/g, "_");
       doc.save(`ErgoBot_SelfCheck_${safeName}.pdf`);
     }
-
   </script>
 
 </body>
